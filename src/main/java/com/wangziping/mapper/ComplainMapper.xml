@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.wangziping.mapper.ComplainMapper">
+	<resultMap id="complainResultMap" type="Complain">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="typeName" property="typename" jdbcType="VARCHAR" />
+		<result column="url" property="url"
+			jdbcType="VARCHAR" />
+		<result column="content" property="content" jdbcType="VARCHAR" />
+		<result column="picurl" property="picurl" jdbcType="VARCHAR" />
+		<result column="url" property="url" jdbcType="VARCHAR" />
+		<result column="articleId" property="article_id" jdbcType="INTEGER" />
+		<result column="user_id" property="user_id" jdbcType="INTEGER" />
+		<association property="user" javaType="User" select="com.wangziping.mapper.UserMapper.selectByPrimaryKey" column="user_id"></association>
+		<association property="article" javaType="Article" select="com.wangziping.mapper.ArticleMapper.selectByPrimaryKey" column="article_id"></association>
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, name, description, icon, sorted
+	</sql>
+
+	<insert id="insert">
+		insert into cms_complain(url, typename, content,
+		user_id, created,
+		article_id, picurl)
+		values(#{url}, #{typename},
+		#{content}, #{user_id}, now(),
+		#{articleId}, #{picurl});
+	</insert>
+
+	<select id="selects" resultMap="complainResultMap">
+		select * from cms_complain c left join cms_article a
+		on c.article_id = a.id
+		<where>
+			<if test="typename!= null and typename!=''">
+				and c.typename = #{typename}
+			</if>
+			<if test="startNum!= null">
+				and a.complainnum = #{startNum}
+			</if>
+			<if test="endNum!= null">
+				and a.complainnum = #{endNum}
+			</if>
+			<if test="startTime!= null and startTime != ''">
+				and c.created >= #{startTime}
+			</if>
+			<if test="endTime!= null and endTime != ''">
+				and c.created &lt;= #{endTime}
+			</if>
+		
+		</where>
+		<if test="(orderName!=null and orderName!='') and orderMethod!=null and  orderName!=''">
+         	order by ${orderName} ${orderMethod}
+         </if>
+	</select>
+</mapper>
